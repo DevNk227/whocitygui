@@ -3,119 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WANWEEK Twitter</title>
+    <title>WANWEEK Twitter PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ทำให้พื้นหลังโปร่งใส และซ่อน Scrollbar */
-        body { background-color: transparent !important; overflow: hidden; font-family: sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { 
+            background-color: transparent !important; 
+            overflow: hidden; 
+            font-family: 'Prompt', sans-serif; 
+        }
+        /* แต่ง Scrollbar ให้เหมือนมือถือ */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #38444d; border-radius: 10px; }
+        
+        /* แอนิเมชันปุ่มหัวใจ */
+        @keyframes heartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .liked svg { animation: heartPulse 0.3s ease-in-out; fill: #F91880; color: #F91880; }
+        
+        /* แอนิเมชันตอนหน้าต่างเด้งขึ้นมา */
+        .fade-in-up { animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="w-screen h-screen flex justify-end items-center pr-10">
 
-    <div class="w-[340px] h-[650px] bg-[#15202B] rounded-[40px] border-[10px] border-[#22303C] shadow-2xl relative flex flex-col overflow-hidden">
+    <div class="w-[360px] h-[700px] bg-[#000000] rounded-[50px] border-[8px] border-[#1a1a1a] shadow-[0_0_40px_rgba(29,161,242,0.15)] ring-1 ring-white/10 relative flex flex-col overflow-hidden">
         
-        <div class="flex items-center px-5 py-4 border-b border-gray-800 bg-[#15202B]/90 backdrop-blur-sm z-10">
-            <svg width="24" height="24" class="text-[#1DA1F2]" fill="currentColor" viewBox="0 0 24 24"><path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"/></svg>
-            <h1 class="ml-3 font-bold text-white text-lg tracking-wide">Twitter</h1>
+        <div class="h-7 w-full flex justify-between items-center px-6 text-[12px] text-white font-medium z-50 absolute top-0">
+            <span id="clock">12:00</span>
+            <div class="w-24 h-5 bg-black rounded-full absolute left-1/2 -translate-x-1/2 top-1"></div>
+            <div class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21a2.01 2.01 0 01-1.41-.59l-8-8A2 2 0 012 11V5a2 2 0 012-2h6a2 2 0 011.41.59l8 8a2 2 0 010 2.82l-6 6A2.01 2.01 0 0112 21z"/></svg> <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 10V8a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-2h2v-4h-2zm-2 4H4V8h14v6z"/></svg> </div>
         </div>
 
-        <div id="tweet-container" class="flex-1 overflow-y-auto no-scrollbar">
+        <div class="mt-7 h-[calc(100%-28px)] bg-[#15202B] rounded-b-[40px] flex flex-col relative">
+            
+            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-800/60 bg-[#15202B]/80 backdrop-blur-md z-10 sticky top-0">
+                <div class="flex items-center">
+                    <svg width="24" height="24" class="text-[#1DA1F2]" fill="currentColor" viewBox="0 0 24 24"><path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"/></svg>
+                    <h1 class="ml-2 font-bold text-white text-lg tracking-wide">หน้าแรก</h1>
+                </div>
+                <button onclick="closePhone()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
 
-        <button onclick="toggleModal(true)" class="absolute bottom-6 right-5 w-14 h-14 bg-[#1DA1F2] hover:bg-blue-500 rounded-full flex items-center justify-center text-white shadow-[0_4px_10px_rgba(29,161,242,0.4)] transition transform hover:scale-105">
-            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-        </button>
+            <div id="tweet-container" class="flex-1 overflow-y-auto custom-scroll pb-20">
+                </div>
 
-        <div id="modal" class="hidden absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div class="bg-[#15202B] w-full max-w-[300px] rounded-2xl p-4 shadow-2xl border border-gray-700">
-                <div class="flex justify-between items-center mb-4">
-                    <button onclick="toggleModal(false)" class="text-white hover:bg-gray-800 p-1 rounded-full">
-                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                    <button onclick="sendTweet()" class="bg-[#1DA1F2] text-white font-bold py-1.5 px-4 rounded-full text-sm hover:bg-blue-500 transition">
-                        โพสต์
-                    </button>
+            <button onclick="toggleModal(true)" class="absolute bottom-6 right-5 w-14 h-14 bg-[#1DA1F2] hover:bg-[#1a91da] rounded-full flex items-center justify-center text-white shadow-[0_4px_15px_rgba(29,161,242,0.5)] transition-all duration-300 hover:scale-110 active:scale-95 z-20">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            </button>
+            
+            <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full z-20"></div>
+
+            <div id="modal" class="hidden absolute inset-0 bg-[#15202B]/95 backdrop-blur-md z-50 flex flex-col">
+                <div class="flex justify-between items-center px-4 py-3 border-b border-gray-800">
+                    <button onclick="toggleModal(false)" class="text-white text-[15px] hover:text-gray-300">ยกเลิก</button>
+                    <button id="post-btn" onclick="sendTweet()" class="bg-[#1DA1F2] text-white font-bold py-1.5 px-5 rounded-full text-[14px] opacity-50 transition-all">โพสต์</button>
                 </div>
                 
-                <div class="flex gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1DA1F2] to-blue-800 shrink-0"></div>
+                <div class="flex gap-3 p-4 flex-1 overflow-y-auto custom-scroll">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1DA1F2] to-[#8A2BE2] shrink-0 border border-gray-700 shadow-inner"></div>
                     <div class="flex-1">
-                        <textarea id="input-msg" placeholder="คุณกำลังคิดอะไรอยู่?" class="w-full bg-transparent text-white text-lg placeholder-gray-500 outline-none resize-none min-h-[80px]"></textarea>
-                        <div class="border-t border-gray-700 pt-3 mt-2">
-                            <input id="input-url" type="text" placeholder="วางลิงก์รูปภาพ (Imgur) ที่นี่" class="w-full bg-[#22303C] text-[#1DA1F2] text-sm px-3 py-2 rounded-lg outline-none placeholder-gray-500 border border-transparent focus:border-[#1DA1F2] transition">
+                        <textarea id="input-msg" oninput="checkInput()" placeholder="มีอะไรเกิดขึ้นบ้าง?" class="w-full bg-transparent text-white text-[17px] placeholder-gray-500 outline-none resize-none min-h-[100px]"></textarea>
+                        
+                        <div class="mt-2 bg-[#202E3A] rounded-xl flex items-center px-3 py-2 border border-transparent focus-within:border-[#1DA1F2] transition-colors">
+                            <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <input id="input-url" type="text" oninput="checkInput()" placeholder="วางลิงก์รูปภาพ (Imgur/Discord)" class="w-full bg-transparent text-[#1DA1F2] text-[14px] outline-none placeholder-gray-500">
+                        </div>
+
+                        <div id="image-preview" class="hidden mt-3 rounded-2xl overflow-hidden border border-gray-700 relative">
+                            <img id="preview-img" src="" class="w-full h-auto max-h-48 object-cover">
+                            <button onclick="clearImage()" class="absolute top-2 right-2 bg-black/70 p-1.5 rounded-full text-white hover:bg-black">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 
     <script>
-        // ข้อมูลทวีตเริ่มต้น
+        // ข้อมูลจำลอง + เพิ่มระบบ Likes
         let tweets = [
-            { name: "Admin WANWEEK", msg: "ระบบ Twitter แบบ HTML ธรรมดา ลื่นๆ เบาๆ ครับ 🚀", url: "", time: "1 นาทีที่แล้ว" },
-            { name: "Natchakorn Thongtem", msg: "แวะมาถ่ายรูปกันได้เลยครับ", url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=800&auto=format&fit=crop", time: "5 นาทีที่แล้ว" }
+            { id: 1, name: "Admin WANWEEK", msg: "ยินดีต้อนรับสู่ Twitter เวอร์ชั่น PRO 🚀", url: "", time: "1 นาทีที่แล้ว", likes: 124, liked: true },
+            { id: 2, name: "Natchakorn Thongtem", msg: "ภาพสวยจัดเลยครับ ระบบใหม่ลื่นปรื๊ดดด", url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=800&auto=format&fit=crop", time: "5 นาทีที่แล้ว", likes: 12, liked: false }
         ];
 
-        // ฟังก์ชันวาดทวีตลงจอ
+        // นาฬิกา Status Bar
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        }, 1000);
+
+        // เช็คการพิมพ์เพื่อเปิดปุ่มโพสต์ และโชว์พรีวิวรูป
+        function checkInput() {
+            const msg = document.getElementById('input-msg').value;
+            const url = document.getElementById('input-url').value;
+            const btn = document.getElementById('post-btn');
+            const previewBox = document.getElementById('image-preview');
+            const previewImg = document.getElementById('preview-img');
+
+            // เปิด/ปิด ปุ่มโพสต์
+            if (msg.trim() !== '' || url.trim() !== '') {
+                btn.classList.remove('opacity-50');
+                btn.classList.add('hover:bg-[#1a91da]');
+            } else {
+                btn.classList.add('opacity-50');
+                btn.classList.remove('hover:bg-[#1a91da]');
+            }
+
+            // โชว์รูปพรีวิวถ้าวางลิงก์
+            if (url.match(/\.(jpeg|jpg|gif|png)$/) != null || url.includes('imgur') || url.includes('http')) {
+                previewImg.src = url;
+                previewBox.classList.remove('hidden');
+            } else {
+                previewBox.classList.add('hidden');
+            }
+        }
+
+        // ลบรูประหว่างพิมพ์
+        function clearImage() {
+            document.getElementById('input-url').value = '';
+            checkInput();
+        }
+
+        // ระบบกดหัวใจ
+        window.toggleLike = function(id) {
+            const tweet = tweets.find(t => t.id === id);
+            if(tweet) {
+                tweet.liked = !tweet.liked;
+                tweet.likes += tweet.liked ? 1 : -1;
+                renderTweets();
+            }
+        }
+
+        // วาดหน้าจอทวีต
         function renderTweets() {
             const container = document.getElementById('tweet-container');
             container.innerHTML = '';
             tweets.forEach(tweet => {
-                let imgHTML = tweet.url ? `<div class="mt-3 rounded-2xl overflow-hidden border border-gray-800"><img src="${tweet.url}" class="w-full object-cover max-h-60"></div>` : '';
+                // เช็คว่าเป็น Admin ไหม (ถ้าใช่ให้มีติ๊กถูกสีฟ้า)
+                const verifiedBadge = tweet.name.toLowerCase().includes("admin") ? `<svg class="w-[16px] h-[16px] text-[#1D9BF0] ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.74 2.76 1.868 3.46-.067.31-.104.63-.104.95 0 2.21 1.71 4 3.918 4 .54 0 1.05-.12 1.51-.33.518 1.32 1.815 2.22 3.325 2.22s2.806-.9 3.325-2.22c.46.21 1.97.33 1.51.33 2.21 0 3.918-1.79 3.918-4 0-.32-.037-.64-.104-.95 1.128-.7 1.868-2 1.868-3.46zm-10.46 3.68l-3.95-3.95 1.41-1.41 2.54 2.54 5.43-5.43 1.41 1.41-6.84 6.84z"/></svg>` : '';
+                
+                let imgHTML = tweet.url ? `<div class="mt-3 rounded-2xl overflow-hidden border border-gray-700/50 hover:brightness-110 transition cursor-pointer"><img src="${tweet.url}" class="w-full object-cover max-h-60"></div>` : '';
+                
+                // ปุ่มหัวใจ (เปลี่ยนสีถ้ารูป)
+                let heartClass = tweet.liked ? "liked" : "text-gray-500 hover:text-[#F91880]";
+                
                 container.innerHTML += `
-                    <div class="flex px-4 py-3 border-b border-gray-800 hover:bg-white/[0.03] transition">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1DA1F2] to-blue-800 flex items-center justify-center text-white font-bold shrink-0">${tweet.name.charAt(0)}</div>
+                    <div class="flex px-4 py-3.5 border-b border-gray-800/80 hover:bg-white/[0.02] transition-colors fade-in-up">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1DA1F2] to-blue-900 flex items-center justify-center text-white font-bold shrink-0 shadow-md">${tweet.name.charAt(0)}</div>
                         <div class="ml-3 flex-1">
-                            <div class="flex items-baseline gap-1">
-                                <span class="font-bold text-white text-[15px]">${tweet.name}</span>
-                                <span class="text-[#8899A6] text-sm">· ${tweet.time}</span>
+                            <div class="flex items-center">
+                                <span class="font-bold text-white text-[15px] hover:underline cursor-pointer flex items-center">${tweet.name} ${verifiedBadge}</span>
+                                <span class="text-[#71767B] text-[14px] ml-2">· ${tweet.time}</span>
                             </div>
-                            ${tweet.msg ? `<p class="text-white text-[15px] mt-1 whitespace-pre-wrap">${tweet.msg}</p>` : ''}
+                            ${tweet.msg ? `<p class="text-[#E7E9EA] text-[15px] mt-0.5 whitespace-pre-wrap leading-relaxed">${tweet.msg}</p>` : ''}
                             ${imgHTML}
+                            
+                            <div class="flex justify-between items-center mt-3 max-w-[220px]">
+                                <button class="group flex items-center gap-1.5 text-gray-500 hover:text-[#1DA1F2] transition">
+                                    <div class="p-1.5 rounded-full group-hover:bg-[#1DA1F2]/10 transition"><svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg></div>
+                                </button>
+                                <button class="group flex items-center gap-1.5 text-gray-500 hover:text-[#00BA7C] transition">
+                                    <div class="p-1.5 rounded-full group-hover:bg-[#00BA7C]/10 transition"><svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></div>
+                                </button>
+                                <button onclick="toggleLike(${tweet.id})" class="group flex items-center gap-1.5 transition ${heartClass}">
+                                    <div class="p-1.5 rounded-full group-hover:bg-[#F91880]/10 transition"><svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+                                    <span class="text-[13px] font-medium">${tweet.likes > 0 ? tweet.likes : ''}</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
             });
         }
 
-        // เปิด/ปิด หน้าต่างพิมพ์
+        // เปิด/ปิด หน้าต่าง
         function toggleModal(show) {
-            document.getElementById('modal').style.display = show ? 'flex' : 'none';
+            const modal = document.getElementById('modal');
+            if(show) {
+                modal.classList.remove('hidden');
+                document.getElementById('input-msg').focus();
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        // ปิดโทรศัพท์ ส่งค่าไป Pawn
+        function closePhone() {
+            if (typeof cef !== 'undefined') {
+                cef.emit("OnPlayerCloseTwitter");
+            } else {
+                console.log("ปิดโทรศัพท์เรียบร้อย (ทดสอบบนเว็บ)");
+            }
         }
 
         // ส่งทวีต
         function sendTweet() {
             const msg = document.getElementById('input-msg').value;
             const url = document.getElementById('input-url').value;
-            if (!msg && !url) return;
+            if (msg.trim() === '' && url.trim() === '') return;
 
-            // เช็คว่าอยู่ในเกมไหม
             if (typeof cef !== 'undefined') {
                 cef.emit("OnPlayerSendTweet", msg, url);
             } else {
-                // ทดสอบบนเว็บปกติ
-                tweets.unshift({ name: "Player", msg: msg, url: url, time: "เมื่อสักครู่" });
+                tweets.unshift({ id: Date.now(), name: "Player VIP", msg: msg, url: url, time: "เมื่อสักครู่", likes: 0, liked: false });
                 renderTweets();
             }
 
             document.getElementById('input-msg').value = '';
             document.getElementById('input-url').value = '';
+            checkInput();
             toggleModal(false);
         }
 
-        // ดักฟังจาก Pawn Script
+        // รับข้อมูลจาก Pawn
         if (typeof cef !== 'undefined') {
             cef.on("AddNewTweet", (name, message, image, time) => {
-                tweets.unshift({ name: name, msg: message, url: image, time: time });
+                tweets.unshift({ id: Date.now(), name: name, msg: message, url: image, time: time, likes: 0, liked: false });
                 renderTweets();
             });
         }
 
-        // เริ่มต้นวาดหน้าจอ
         renderTweets();
     </script>
 </body>
