@@ -42,70 +42,46 @@
     </div>
 
     <script>
-        // ---------------------------------------------------------
-        // แก้ไข: ฟังก์ชันถอดรหัสลับ (Hex) ให้กลับมาเป็นภาษาไทย (ป้องกันกล่องสี่เหลี่ยม)
-        // ---------------------------------------------------------
-        function decodeThaiHex(hexStr) {
-            // ดักจับกรณีไม่มีข้อมูลส่งมา
-            if (!hexStr || typeof hexStr !== 'string') return "";
-            
-            let result = "";
-            for (let i = 0; i < hexStr.length; i += 2) {
-                let chunk = hexStr.substr(i, 2);
-                
-                // ป้องกันถ้าข้อมูลมาไม่ครบ 2 หลัก
-                if (chunk.length < 2) break;
-                
-                let code = parseInt(chunk, 16);
-                
-                // 🚨 สำคัญมาก: ถ้าค่าเป็น NaN (แปลงไม่ได้) หรือ 0 (Null Byte) ให้ข้ามเลย ห้ามโชว์!
-                if (isNaN(code) || code === 0) continue;
-                
-                // เช็คว่าเป็นสระ/พยัญชนะไทยไหม
-                if (code >= 0xA1 && code <= 0xFB) {
-                    result += String.fromCharCode(code + 0x0D60); 
-                } else {
-                    result += String.fromCharCode(code); // ถ้าเป็นอังกฤษ/ตัวเลข ให้แสดงปกติ
+        // สุดยอดระบบซ่อมฟอนต์ไทย (ตัวเดิมที่ฉลาดๆ)
+        function superDecodeThai(str) {
+            if (!str) return "";
+            let isHex = true, hexResult = "";
+            if (str.length % 2 === 0 && str.length > 0) {
+                for (let i = 0; i < str.length; i += 2) {
+                    let code = parseInt(str.substr(i, 2), 16);
+                    if (isNaN(code)) { isHex = false; break; }
+                    if (code >= 0xA1 && code <= 0xFB) hexResult += String.fromCharCode(code + 0x0D60); 
+                    else hexResult += String.fromCharCode(code);
                 }
+            } else isHex = false;
+
+            if (isHex) return hexResult; 
+
+            let normalResult = "";
+            for (let i = 0; i < str.length; i++) {
+                let code = str.charCodeAt(i);
+                if (code >= 0xA1 && code <= 0xFB) normalResult += String.fromCharCode(code + 0x0D60);
+                else normalResult += str.charAt(i);
             }
-            return result;
+            return normalResult;
         }
 
-        // ---------------------------------------------------------
-        // ฟังก์ชันรับข้อมูลจากตัวเกมและโชว์ป้าย (รับค่าเป็น Hex)
-        // ---------------------------------------------------------
-        if (typeof cef !== 'undefined') {
-            cef.on("ShowTweetNotify", (hexName, hexMessage) => {
-                
-                // เอาข้อมูลที่รับมา ไปถอดรหัสก่อนใช้งาน
-                const realName = decodeThaiHex(hexName);
-                const realMessage = decodeThaiHex(hexMessage);
+        // 🚨 ของใหม่! เปิดประตูรับคำสั่งตรงจากโปรแกรม Pawn (JS Injection)
+        window.ForceShowTweet = function(hexName, hexMessage) {
+            const realName = superDecodeThai(hexName);
+            const realMessage = superDecodeThai(hexMessage);
 
-                document.getElementById('player-name').innerText = realName;
-                document.getElementById('player-msg').innerText = realMessage;
-                
-                // โชว์อักษรตัวแรกของชื่อในวงกลมโปรไฟล์ หรือใส่ ? ถ้าไม่มีชื่อ
-                if(realName.length > 0) {
-                    document.getElementById('avatar').innerText = realName.charAt(0);
-                } else {
-                    document.getElementById('avatar').innerText = "?";
-                }
-                
-                const box = document.getElementById('notify-box');
-                box.classList.remove('hidden');
-                box.classList.add('slide-down');
-            });
-        } else {
-            // โค้ดทดสอบบนเบราว์เซอร์ปกติ
-            setTimeout(() => {
-                document.getElementById('player-name').innerText = "ณัฐชกรณ์ ทองเต็ม";
-                document.getElementById('player-msg').innerText = "ทดสอบระบบ UI แจ้งเตือน Twitter ด้านบนจอครับผม!";
-                document.getElementById('avatar').innerText = "ณ";
-                const box = document.getElementById('notify-box');
-                box.classList.remove('hidden');
-                box.classList.add('slide-down');
-            }, 1000);
-        }
+            document.getElementById('player-name').innerText = realName;
+            document.getElementById('player-msg').innerText = realMessage;
+            if(realName.length > 0) document.getElementById('avatar').innerText = realName.charAt(0);
+            
+            const box = document.getElementById('notify-box');
+            // รีเซ็ตแอนิเมชันให้มันเด้งใหม่ทุกครั้งที่ถูกเรียก
+            box.classList.remove('slide-down');
+            void box.offsetWidth; 
+            box.classList.remove('hidden');
+            box.classList.add('slide-down');
+        };
     </script>
 </body>
 </html>
