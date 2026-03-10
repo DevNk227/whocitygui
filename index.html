@@ -42,12 +42,39 @@
     </div>
 
     <script>
-        // ฟังก์ชันรับข้อมูลจากตัวเกมและโชว์ป้าย
+        // ---------------------------------------------------------
+        // เพิ่ม: ฟังก์ชันถอดรหัสลับ (Hex) ให้กลับมาเป็นภาษาไทย
+        // ---------------------------------------------------------
+        function decodeThaiHex(hexStr) {
+            let result = "";
+            for (let i = 0; i < hexStr.length; i += 2) {
+                let code = parseInt(hexStr.substr(i, 2), 16);
+                // เช็คว่าเป็นสระ/พยัญชนะไทยไหม
+                if (code >= 0xA1 && code <= 0xFB) {
+                    result += String.fromCharCode(code + 0x0D60); 
+                } else {
+                    result += String.fromCharCode(code); // ถ้าเป็นอังกฤษ/ตัวเลข ให้แสดงปกติ
+                }
+            }
+            return result;
+        }
+
+        // ---------------------------------------------------------
+        // แก้ไข: ฟังก์ชันรับข้อมูลจากตัวเกมและโชว์ป้าย (รับค่าเป็น Hex)
+        // ---------------------------------------------------------
         if (typeof cef !== 'undefined') {
-            cef.on("ShowTweetNotify", (name, message) => {
-                document.getElementById('player-name').innerText = name;
-                document.getElementById('player-msg').innerText = message;
-                document.getElementById('avatar').innerText = name.charAt(0);
+            cef.on("ShowTweetNotify", (hexName, hexMessage) => {
+                
+                // เอาข้อมูลที่รับมา ไปถอดรหัสก่อนใช้งาน
+                const realName = decodeThaiHex(hexName);
+                const realMessage = decodeThaiHex(hexMessage);
+
+                document.getElementById('player-name').innerText = realName;
+                document.getElementById('player-msg').innerText = realMessage;
+                // โชว์อักษรตัวแรกของชื่อในวงกลมโปรไฟล์
+                if(realName.length > 0) {
+                    document.getElementById('avatar').innerText = realName.charAt(0);
+                }
                 
                 const box = document.getElementById('notify-box');
                 box.classList.remove('hidden');
