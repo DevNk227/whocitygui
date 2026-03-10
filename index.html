@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WANWEEK Twitter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ทำให้พื้นหลังโปร่งใส และซ่อน Scrollbar */
+        body { background-color: transparent !important; overflow: hidden; font-family: sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="w-screen h-screen flex justify-end items-center pr-10">
+
+    <div class="w-[340px] h-[650px] bg-[#15202B] rounded-[40px] border-[10px] border-[#22303C] shadow-2xl relative flex flex-col overflow-hidden">
+        
+        <div class="flex items-center px-5 py-4 border-b border-gray-800 bg-[#15202B]/90 backdrop-blur-sm z-10">
+            <svg width="24" height="24" class="text-[#1DA1F2]" fill="currentColor" viewBox="0 0 24 24"><path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"/></svg>
+            <h1 class="ml-3 font-bold text-white text-lg tracking-wide">Twitter</h1>
+        </div>
+
+        <div id="tweet-container" class="flex-1 overflow-y-auto no-scrollbar">
+            </div>
+
+        <button onclick="toggleModal(true)" class="absolute bottom-6 right-5 w-14 h-14 bg-[#1DA1F2] hover:bg-blue-500 rounded-full flex items-center justify-center text-white shadow-[0_4px_10px_rgba(29,161,242,0.4)] transition transform hover:scale-105">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        </button>
+
+        <div id="modal" class="hidden absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div class="bg-[#15202B] w-full max-w-[300px] rounded-2xl p-4 shadow-2xl border border-gray-700">
+                <div class="flex justify-between items-center mb-4">
+                    <button onclick="toggleModal(false)" class="text-white hover:bg-gray-800 p-1 rounded-full">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                    <button onclick="sendTweet()" class="bg-[#1DA1F2] text-white font-bold py-1.5 px-4 rounded-full text-sm hover:bg-blue-500 transition">
+                        โพสต์
+                    </button>
+                </div>
+                
+                <div class="flex gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1DA1F2] to-blue-800 shrink-0"></div>
+                    <div class="flex-1">
+                        <textarea id="input-msg" placeholder="คุณกำลังคิดอะไรอยู่?" class="w-full bg-transparent text-white text-lg placeholder-gray-500 outline-none resize-none min-h-[80px]"></textarea>
+                        <div class="border-t border-gray-700 pt-3 mt-2">
+                            <input id="input-url" type="text" placeholder="วางลิงก์รูปภาพ (Imgur) ที่นี่" class="w-full bg-[#22303C] text-[#1DA1F2] text-sm px-3 py-2 rounded-lg outline-none placeholder-gray-500 border border-transparent focus:border-[#1DA1F2] transition">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ข้อมูลทวีตเริ่มต้น
+        let tweets = [
+            { name: "Admin WANWEEK", msg: "ระบบ Twitter แบบ HTML ธรรมดา ลื่นๆ เบาๆ ครับ 🚀", url: "", time: "1 นาทีที่แล้ว" },
+            { name: "Natchakorn Thongtem", msg: "แวะมาถ่ายรูปกันได้เลยครับ", url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=800&auto=format&fit=crop", time: "5 นาทีที่แล้ว" }
+        ];
+
+        // ฟังก์ชันวาดทวีตลงจอ
+        function renderTweets() {
+            const container = document.getElementById('tweet-container');
+            container.innerHTML = '';
+            tweets.forEach(tweet => {
+                let imgHTML = tweet.url ? `<div class="mt-3 rounded-2xl overflow-hidden border border-gray-800"><img src="${tweet.url}" class="w-full object-cover max-h-60"></div>` : '';
+                container.innerHTML += `
+                    <div class="flex px-4 py-3 border-b border-gray-800 hover:bg-white/[0.03] transition">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1DA1F2] to-blue-800 flex items-center justify-center text-white font-bold shrink-0">${tweet.name.charAt(0)}</div>
+                        <div class="ml-3 flex-1">
+                            <div class="flex items-baseline gap-1">
+                                <span class="font-bold text-white text-[15px]">${tweet.name}</span>
+                                <span class="text-[#8899A6] text-sm">· ${tweet.time}</span>
+                            </div>
+                            ${tweet.msg ? `<p class="text-white text-[15px] mt-1 whitespace-pre-wrap">${tweet.msg}</p>` : ''}
+                            ${imgHTML}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // เปิด/ปิด หน้าต่างพิมพ์
+        function toggleModal(show) {
+            document.getElementById('modal').style.display = show ? 'flex' : 'none';
+        }
+
+        // ส่งทวีต
+        function sendTweet() {
+            const msg = document.getElementById('input-msg').value;
+            const url = document.getElementById('input-url').value;
+            if (!msg && !url) return;
+
+            // เช็คว่าอยู่ในเกมไหม
+            if (typeof cef !== 'undefined') {
+                cef.emit("OnPlayerSendTweet", msg, url);
+            } else {
+                // ทดสอบบนเว็บปกติ
+                tweets.unshift({ name: "Player", msg: msg, url: url, time: "เมื่อสักครู่" });
+                renderTweets();
+            }
+
+            document.getElementById('input-msg').value = '';
+            document.getElementById('input-url').value = '';
+            toggleModal(false);
+        }
+
+        // ดักฟังจาก Pawn Script
+        if (typeof cef !== 'undefined') {
+            cef.on("AddNewTweet", (name, message, image, time) => {
+                tweets.unshift({ name: name, msg: message, url: image, time: time });
+                renderTweets();
+            });
+        }
+
+        // เริ่มต้นวาดหน้าจอ
+        renderTweets();
+    </script>
+</body>
+</html>
